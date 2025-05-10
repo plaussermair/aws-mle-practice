@@ -35,6 +35,38 @@ from steps.s8_ensemble_model import show_ensemble_model
 from steps.s9_interpretation import show_interpretation
 from steps.s10_conclusion import show_conclusion
 
+st.write("--- Debug Information ---")
+st.write(f"Current Working Directory (os.getcwd()): {os.getcwd()}")
+st.write(f"Absolute path of app.py (__file__): {os.path.abspath(__file__)}")
+
+# Construct the expected path to the artifacts directory
+# This assumes app.py is in 'churn portfolio app' and 'artifacts' is a sibling to app.py's parent or directly relative
+script_dir = os.path.dirname(os.path.abspath(__file__))
+expected_artifacts_path = os.path.join(script_dir, "artifacts") # This should resolve to '.../churn portfolio app/artifacts'
+st.write(f"Expected artifacts directory path: {expected_artifacts_path}")
+
+# Check if the expected artifacts directory exists
+if os.path.exists(expected_artifacts_path):
+    st.write(f"SUCCESS: Artifacts directory found at: {expected_artifacts_path}")
+    st.write(f"Contents of artifacts directory: {os.listdir(expected_artifacts_path)}")
+    
+    # Specifically check for one of the problematic files
+    data_file_debug_path = os.path.join(expected_artifacts_path, "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+    if os.path.exists(data_file_debug_path):
+        st.write(f"SUCCESS: Data file found at: {data_file_debug_path}")
+    else:
+        st.error(f"ERROR: Data file NOT found at: {data_file_debug_path}")
+else:
+    st.error(f"ERROR: Artifacts directory NOT found at: {expected_artifacts_path}")
+    st.write("Attempting to list contents of the script's directory:")
+    st.write(f"Contents of script_dir ({script_dir}): {os.listdir(script_dir)}")
+    st.write("Attempting to list contents of the CWD:")
+    st.write(f"Contents of CWD ({os.getcwd()}): {os.listdir(os.getcwd())}")
+
+
+st.write("--- End Debug Information ---")
+
+
 # --- Configuration ---
 st.set_page_config(
     page_title="Customer Churn Prediction Showcase",
