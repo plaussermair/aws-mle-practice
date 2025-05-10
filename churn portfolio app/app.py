@@ -35,36 +35,36 @@ from steps.s8_ensemble_model import show_ensemble_model
 from steps.s9_interpretation import show_interpretation
 from steps.s10_conclusion import show_conclusion
 
-st.write("--- Debug Information ---")
-st.write(f"Current Working Directory (os.getcwd()): {os.getcwd()}")
-st.write(f"Absolute path of app.py (__file__): {os.path.abspath(__file__)}")
+# st.write("--- Debug Information ---")
+# st.write(f"Current Working Directory (os.getcwd()): {os.getcwd()}")
+# st.write(f"Absolute path of app.py (__file__): {os.path.abspath(__file__)}")
 
-# Construct the expected path to the artifacts directory
-# This assumes app.py is in 'churn portfolio app' and 'artifacts' is a sibling to app.py's parent or directly relative
-script_dir = os.path.dirname(os.path.abspath(__file__))
-expected_artifacts_path = os.path.join(script_dir, "artifacts") # This should resolve to '.../churn portfolio app/artifacts'
-st.write(f"Expected artifacts directory path: {expected_artifacts_path}")
+# # Construct the expected path to the artifacts directory
+# # This assumes app.py is in 'churn portfolio app' and 'artifacts' is a sibling to app.py's parent or directly relative
+# script_dir = os.path.dirname(os.path.abspath(__file__))
+# expected_artifacts_path = os.path.join(script_dir, "artifacts") # This should resolve to '.../churn portfolio app/artifacts'
+# st.write(f"Expected artifacts directory path: {expected_artifacts_path}")
 
-# Check if the expected artifacts directory exists
-if os.path.exists(expected_artifacts_path):
-    st.write(f"SUCCESS: Artifacts directory found at: {expected_artifacts_path}")
-    st.write(f"Contents of artifacts directory: {os.listdir(expected_artifacts_path)}")
+# # Check if the expected artifacts directory exists
+# if os.path.exists(expected_artifacts_path):
+#     st.write(f"SUCCESS: Artifacts directory found at: {expected_artifacts_path}")
+#     st.write(f"Contents of artifacts directory: {os.listdir(expected_artifacts_path)}")
     
-    # Specifically check for one of the problematic files
-    data_file_debug_path = os.path.join(expected_artifacts_path, "WA_Fn-UseC_-Telco-Customer-Churn.csv")
-    if os.path.exists(data_file_debug_path):
-        st.write(f"SUCCESS: Data file found at: {data_file_debug_path}")
-    else:
-        st.error(f"ERROR: Data file NOT found at: {data_file_debug_path}")
-else:
-    st.error(f"ERROR: Artifacts directory NOT found at: {expected_artifacts_path}")
-    st.write("Attempting to list contents of the script's directory:")
-    st.write(f"Contents of script_dir ({script_dir}): {os.listdir(script_dir)}")
-    st.write("Attempting to list contents of the CWD:")
-    st.write(f"Contents of CWD ({os.getcwd()}): {os.listdir(os.getcwd())}")
+#     # Specifically check for one of the problematic files
+#     data_file_debug_path = os.path.join(expected_artifacts_path, "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+#     if os.path.exists(data_file_debug_path):
+#         st.write(f"SUCCESS: Data file found at: {data_file_debug_path}")
+#     else:
+#         st.error(f"ERROR: Data file NOT found at: {data_file_debug_path}")
+# else:
+#     st.error(f"ERROR: Artifacts directory NOT found at: {expected_artifacts_path}")
+#     st.write("Attempting to list contents of the script's directory:")
+#     st.write(f"Contents of script_dir ({script_dir}): {os.listdir(script_dir)}")
+#     st.write("Attempting to list contents of the CWD:")
+#     st.write(f"Contents of CWD ({os.getcwd()}): {os.listdir(os.getcwd())}")
 
 
-st.write("--- End Debug Information ---")
+# st.write("--- End Debug Information ---")
 
 
 # --- Configuration ---
@@ -74,21 +74,24 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Constants ---
-# Assume artifacts are in the same directory as app.py for simplicity
-# If you move artifacts to a subfolder (e.g., "artifacts/"), change ARTIFACTS_DIR
-ARTIFACTS_DIR = "artifacts"
-DATA_FILE = f"{ARTIFACTS_DIR}/WA_Fn-UseC_-Telco-Customer-Churn.csv"
-PREPROCESSOR_FILE = f"{ARTIFACTS_DIR}/preprocessor.joblib"
-MODEL_COLUMNS_FILE = f"{ARTIFACTS_DIR}/model_columns.txt" # Or .joblib
-BEST_INDIVIDUAL_PIPELINE_FILE = f"{ARTIFACTS_DIR}/best_individual_pipeline.joblib"
-BEST_INDIVIDUAL_NAME_FILE = f"{ARTIFACTS_DIR}/best_individual_name.joblib"
-VOTING_PIPELINE_FILE = f"{ARTIFACTS_DIR}/voting_classifier_pipeline.joblib"
-X_TEST_FILE = f"{ARTIFACTS_DIR}/X_test.joblib"
-Y_TEST_FILE = f"{ARTIFACTS_DIR}/y_test.joblib"
-EVAL_RESULTS_FILE = f"{ARTIFACTS_DIR}/evaluation_results.joblib"
-FINAL_PIPELINE_FILE = f"{ARTIFACTS_DIR}/final_pipeline.joblib"
-FINAL_MODEL_NAME_FILE = f"{ARTIFACTS_DIR}/final_model_name.joblib"
+# --- Determine the directory of the current script ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# --- Define the absolute path to the artifacts directory ---
+ARTIFACTS_ROOT_PATH = os.path.join(SCRIPT_DIR, "artifacts")
+
+# --- Constants using the ARTIFACTS_ROOT_PATH ---
+DATA_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+PREPROCESSOR_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "preprocessor.joblib")
+MODEL_COLUMNS_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "model_columns.txt")
+BEST_INDIVIDUAL_PIPELINE_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "best_individual_pipeline.joblib")
+BEST_INDIVIDUAL_NAME_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "best_individual_name.joblib")
+VOTING_PIPELINE_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "voting_classifier_pipeline.joblib")
+X_TEST_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "X_test.joblib")
+Y_TEST_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "y_test.joblib")
+EVAL_RESULTS_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "evaluation_results.joblib")
+FINAL_PIPELINE_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "final_pipeline.joblib")
+FINAL_MODEL_NAME_FILE = os.path.join(ARTIFACTS_ROOT_PATH, "final_model_name.joblib")
+
 
 # --- Caching Functions ---
 @st.cache_resource(show_spinner="Loading ML model/preprocessor...")
