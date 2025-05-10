@@ -45,7 +45,7 @@ st.set_page_config(
 # --- Constants ---
 # Assume artifacts are in the same directory as app.py for simplicity
 # If you move artifacts to a subfolder (e.g., "artifacts/"), change ARTIFACTS_DIR
-ARTIFACTS_DIR = "/artifacts"
+ARTIFACTS_DIR = "artifacts"
 DATA_FILE = f"{ARTIFACTS_DIR}/WA_Fn-UseC_-Telco-Customer-Churn.csv"
 PREPROCESSOR_FILE = f"{ARTIFACTS_DIR}/preprocessor.joblib"
 MODEL_COLUMNS_FILE = f"{ARTIFACTS_DIR}/model_columns.txt" # Or .joblib
