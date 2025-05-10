@@ -1,9 +1,39 @@
 # app.py
+# Core libraries
 import streamlit as st
-import joblib
 import pandas as pd
 import numpy as np
-import sys # To potentially add steps directory to path if needed, though direct import often works
+import sys
+import os
+import joblib
+
+# Machine Learning
+import sklearn
+import xgboost
+import lightgbm
+import catboost
+
+# Visualization
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Model interpretation
+import shap
+
+# Import step functions
+from steps.s0_introduction import show_introduction
+from steps.s1_load_data import show_load_data
+from steps.s2_eda import show_exploratory_data_analysis
+from steps.s3_feature_engineering import show_feature_engineering
+from steps.s4_data_splitting import show_data_splitting
+from steps.s5_preprocessing import show_preprocessing
+from steps.s6_model_selection import show_model_selection
+from steps.s7_model_evaluation import show_model_evaluation
+from steps.s8_ensemble_model import show_ensemble_model
+from steps.s9_interpretation import show_interpretation
+from steps.s10_conclusion import show_conclusion
 
 # --- Configuration ---
 st.set_page_config(
@@ -15,7 +45,7 @@ st.set_page_config(
 # --- Constants ---
 # Assume artifacts are in the same directory as app.py for simplicity
 # If you move artifacts to a subfolder (e.g., "artifacts/"), change ARTIFACTS_DIR
-ARTIFACTS_DIR = "."
+ARTIFACTS_DIR = "artifacts"
 DATA_FILE = f"{ARTIFACTS_DIR}/WA_Fn-UseC_-Telco-Customer-Churn.csv"
 PREPROCESSOR_FILE = f"{ARTIFACTS_DIR}/preprocessor.joblib"
 MODEL_COLUMNS_FILE = f"{ARTIFACTS_DIR}/model_columns.txt" # Or .joblib
@@ -101,25 +131,6 @@ if not essential_loaded:
     st.stop() # Stop the script if critical files are missing
 
 
-# --- Import Step Functions ---
-# Ensure the 'steps' directory is in the Python path or use relative imports
-try:
-    from steps.s0_introduction import show_introduction
-    from steps.s1_load_data import show_load_data
-    from steps.s2_eda import show_exploratory_data_analysis
-    from steps.s3_feature_engineering import show_feature_engineering
-    from steps.s4_data_splitting import show_data_splitting
-    from steps.s5_preprocessing import show_preprocessing
-    from steps.s6_model_selection import show_model_selection
-    from steps.s7_model_evaluation import show_model_evaluation
-    from steps.s8_ensemble_model import show_ensemble_model
-    from steps.s9_interpretation import show_interpretation
-    from steps.s10_conclusion import show_conclusion
-except ImportError as e:
-    st.error(f"Could not import step functions. Ensure 'steps' directory and '__init__.py' exist.")
-    st.error(f"Import Error: {e}")
-    st.stop()
-
 # --- Define Steps ---
 # Pass only the necessary artifacts from session state to each step function
 # This avoids passing the large 'artifacts' dict repeatedly
@@ -148,69 +159,80 @@ st.subheader("An Interactive ML Workflow Showcase")
 
 # --- Sidebar: Progress Indicator ---
 st.sidebar.title("Workflow Progress")
-st.sidebar.markdown("Navigate using the buttons below the main content.")
+
+# Create a container for the navigation links
+nav_container = st.sidebar.container()
 
 for i, (step_name, _, _) in enumerate(steps):
     is_current = (i == st.session_state.current_step)
-    st.sidebar.markdown(f"{'➡️' if is_current else ''} **{i+1}. {step_name}** {'⬅️' if is_current else ''}")
+    key = f"nav_link_{i}"
+    
+    # Create a button for every step, with consistent numbering
+    button_style = "primary" if is_current else "secondary"
+    # Use i instead of i+1 to match section numbering
+    label = f"{i}. {step_name}"
+    if is_current:
+        label = f"{label}"
+    
+    if nav_container.button(
+        label,
+        key=key,
+        help=f"Navigate to {step_name}",
+        use_container_width=True,
+        type=button_style
+    ):
+        st.session_state.current_step = i
+        st.rerun()
 
 # Add progress bar at the bottom of the sidebar section
 st.sidebar.progress((st.session_state.current_step + 1) / total_steps)
-st.sidebar.markdown("---") # Separator
-# Add portfolio link or name in sidebar
-st.sidebar.info("Created by: [Your Name/Portfolio Link]")
+st.sidebar.markdown("---")
+st.sidebar.info("Created by: Philip Laussermair | [Github](https://github.com/plaussermair) | [Website](www.philiplaussermair.com)")
 
+# Add this after the sidebar section and before the first navigation buttons
 
-# --- Navigation Buttons (Displayed Below Title) ---
-st.markdown("---") # Separator before buttons
-col1, col2, col3 = st.columns([1, 5, 1]) # Adjust width ratios as needed
+def show_navigation_buttons(location="top"):
+    """Creates navigation buttons with unique keys based on location."""
+    col1, col2, col3 = st.columns([1, 5, 1])
+    
+    with col1:
+        if st.session_state.current_step > 0:
+            if st.button("⬅️ Previous", 
+                        use_container_width=True,
+                        key=f"prev_{location}"):
+                st.session_state.current_step -= 1
+                st.rerun()
+    
+    with col3:
+        if st.session_state.current_step < total_steps - 1:
+            if st.button("Next ➡️", 
+                        use_container_width=True,
+                        key=f"next_{location}"):
+                st.session_state.current_step += 1
+                st.rerun()
 
-with col1:
-    if st.session_state.current_step > 0:
-        if st.button("⬅️ Previous", use_container_width=True):
-            st.session_state.current_step -= 1
-            # Reset SHAP calculation flag if moving away from Interpretation step?
-            # if steps[st.session_state.current_step + 1][0] == "Interpretation":
-            #      st.session_state.shap_values_calculated = False # Reset if leaving SHAP page
-            st.rerun()
-
-with col3:
-    if st.session_state.current_step < total_steps - 1:
-        if st.button("Next ➡️", use_container_width=True):
-            st.session_state.current_step += 1
-            st.rerun()
-
-st.markdown("---") # Separator after buttons
+# --- Navigation Buttons (Top) ---
+st.markdown("---")  # Separator before buttons
+show_navigation_buttons(location="top")
+st.markdown("---")  # Separator after buttons
 
 # --- Display Current Step Content ---
 step_name, step_function, step_args = steps[st.session_state.current_step]
-
-# Inject artifacts dictionary into session state if needed by a step (like conclusion)
-# This is slightly less clean than passing args but works if a step needs many artifacts
-# st.session_state.current_artifacts = st.session_state.artifacts # If needed
 
 # Call the function for the current step
 try:
     step_function(**step_args)
 except TypeError as te:
-     st.error(f"Error calling step function '{step_name}': Argument mismatch.")
-     st.error(f"TypeError: {te}")
-     st.error(f"Expected arguments based on definition: {step_function.__code__.co_varnames[:step_function.__code__.co_argcount]}")
-     st.error(f"Provided arguments via step_args: {list(step_args.keys())}")
+    st.error(f"Error calling step function '{step_name}': Argument mismatch.")
+    st.error(f"TypeError: {te}")
+    st.error(f"Expected arguments based on definition: {step_function.__code__.co_varnames[:step_function.__code__.co_argcount]}")
+    st.error(f"Provided arguments via step_args: {list(step_args.keys())}")
 except Exception as e:
-     st.error(f"An unexpected error occurred in step '{step_name}':")
-     st.exception(e)
+    st.error(f"An unexpected error occurred in step '{step_name}':")
+    st.exception(e)
 
-# --- Auto-scroll to top (Optional, can sometimes be jarring) ---
-st.markdown(
-    """
-    <script>
-        // Find the main content section and scroll to top
-        const main = window.parent.document.querySelector('.main > div');
-        if (main) {
-            main.scrollTo(0, 0);
-        }
-    </script>
-    """,
-    unsafe_allow_html=True,
-)
+# --- Navigation Buttons (Bottom) ---
+st.markdown("---")  # Separator before buttons
+show_navigation_buttons(location="bottom")
+st.markdown("---")  # Separator after buttons
+

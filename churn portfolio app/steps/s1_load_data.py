@@ -10,7 +10,7 @@ def show_load_data(df_original):
     The journey begins by loading the raw data using Pandas. We then perform essential initial checks to understand its basic structure and identify immediate issues.
     """)
 
-    with st.expander("Show Raw Data Preview (First 5 Rows)", expanded=False):
+    with st.expander("Show Raw Data Preview (First 5 Rows)", expanded=True):
         st.dataframe(df_original.head())
 
     st.subheader("Dataset Dimensions")
@@ -33,7 +33,7 @@ def show_load_data(df_original):
     st.dataframe(missing_initial[missing_initial > 0])
 
     st.markdown("""
-    As suspected, 'TotalCharges' is initially read as an 'object' (string) type. This often happens when numerical columns contain non-numeric characters (like spaces). We convert it to numeric, forcing errors into `NaN` (Not a Number).
+    'TotalCharges' is initially read as an 'object' (string) type. This often happens when numerical columns contain non-numeric characters (like spaces). We convert it to numeric, forcing errors into `NaN` (Not a Number).
     """)
     df_processed = df_original.copy()
     df_processed['TotalCharges'] = pd.to_numeric(df_processed['TotalCharges'], errors='coerce')
@@ -41,5 +41,7 @@ def show_load_data(df_original):
     st.markdown("**Result after converting 'TotalCharges' to numeric:**")
     st.dataframe(missing_after_conversion[missing_after_conversion > 0])
     st.success("""
-    **Insight:** The conversion reveals missing 'TotalCharges' values. These correspond exactly to customers with `tenure = 0`. For modeling, these were imputed (filled) - the specific strategy (e.g., filling with 0) is discussed in the 'Feature Engineering & Processing' step. For EDA, we might fill them temporarily or exclude them depending on the analysis.
+    **Insight:** The conversion reveals missing 'TotalCharges' values. These correspond exactly to customers with 
+               `tenure = 0`. For modeling, these were *imputed* (filled) - the specific strategy (e.g., filling with 0) 
+               is discussed in the 'Feature Engineering & Processing' step.
     """)

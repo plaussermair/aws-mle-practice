@@ -49,7 +49,7 @@ def show_exploratory_data_analysis(df_original):
         st.warning(f"""
         **Insight:** The dataset is **imbalanced**. Only **{churn_dist.get('Yes', 0):.2f}%** of customers in this dataset churned.
         This means a naive model predicting 'No Churn' for everyone would be ~73% accurate, but useless for identifying churners.
-        This imbalance necessitates techniques like **SMOTE** or **class weighting** during modeling.
+        This imbalance necessitates techniques like Synthetic Minority Oversampling Technique (**SMOTE**) or **class weighting** during modeling.
         """)
 
     with tab2:
@@ -64,7 +64,7 @@ def show_exploratory_data_analysis(df_original):
         plt.tight_layout()
         st.pyplot(fig_num_hist, use_container_width=True)
         plt.close(fig_num_hist)
-        st.markdown("""
+        st.warning("""
         **Insights:**
         *   **Tenure:** Shows a bi-modal tendency - peaks at very low tenure (new customers) and very high tenure (long-term customers), with fewer customers in between.
         *   **MonthlyCharges:** Broadly distributed, with a peak towards lower charges and a long tail towards higher charges. Suggests different service packages/usage levels.
@@ -77,7 +77,7 @@ def show_exploratory_data_analysis(df_original):
         ax_num_box.set_title("Box Plots of Numerical Features")
         st.pyplot(fig_num_box, use_container_width=True)
         plt.close(fig_num_box)
-        st.markdown("""
+        st.warning("""
         **Insights:** Box plots confirm the distributions seen in histograms. 'MonthlyCharges' and 'TotalCharges' don't show significant outliers based on the standard IQR definition, but their skewness is apparent.
         """)
 

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # as SHAP interacts with the fitted pipeline object directly.
 
 def show_interpretation(best_individual_pipeline, best_individual_name, preprocessor, model_columns, X_test):
-    st.header("🔍 8. Final Model Interpretation (SHAP)")
+    st.header("🔍 9. Final Model Interpretation (SHAP)")
 
     # Retrieve final model name from session state if passed, otherwise use best individual
     # This assumes final_model_name was stored in artifacts dict passed to app.py
@@ -103,15 +103,22 @@ def show_interpretation(best_individual_pipeline, best_individual_name, preproce
                     use_tree_explainer = hasattr(interpreter_classifier, 'feature_importances_') and not hasattr(interpreter_classifier, 'coef_')
 
                     if use_tree_explainer:
-                        explainer = shap.TreeExplainer(interpreter_classifier, feature_perturbation="interventional", model_output="probability")
-                         # Using model_output="probability" is generally recommended for consistency
+                        # Remove incompatible parameters and use defaults
+                        explainer = shap.TreeExplainer(interpreter_classifier)
                         shap_values_obj = explainer(X_test_processed_shap_df)
-                        # For probability output with binary classification, shap_values_obj.values often has shape (N, M, 2)
-                        # We usually want the SHAP values for the positive class (class 1)
-                        if shap_values_obj.values.ndim == 3 and shap_values_obj.values.shape[2] == 2:
-                             shap_values_churn = shap_values_obj.values[:,:,1]
-                        else: # Fallback if output is different
-                             shap_values_churn = shap_values_obj.values
+                        
+                        # Handle different output shapes
+                        if hasattr(shap_values_obj, 'values'):
+                            if shap_values_obj.values.ndim == 3:
+                                # For probability outputs with shape (N, M, 2)
+                                shap_values_churn = shap_values_obj.values[:,:,1]
+                            else:
+                                # For single output with shape (N, M)
+                                shap_values_churn = shap_values_obj.values
+                        else:
+                            # Handle case where shap_values_obj is the values directly
+                            shap_values_churn = shap_values_obj
+
                         data_for_plot = X_test_processed_shap_df
                     else: # KernelExplainer
                         st.info("Using KernelExplainer (slower). Subsampling data...")

@@ -12,7 +12,7 @@ def show_introduction():
 
     **The Dataset:**
     We are using the popular **Telco Customer Churn** dataset.
-    *   **Source:** Originally provided by IBM, widely available on platforms like Kaggle.
+    *   **Source:** Originally provided by IBM.
     *   **Content:** Contains customer demographics, account information (tenure, contract type), services subscribed to (phone, internet, streaming, etc.), charges, and the target variable 'Churn' (Yes/No).
     *   **Link:** You can find the dataset and more details [here on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn/data).
 
